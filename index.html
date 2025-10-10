@@ -24,6 +24,10 @@
     addSignalListener(target, event => {
       output.textContent = count.value;
     });
+
+    setTimeout(() => {
+      count.value++;
+    }, 1000);
   </script>
 </head>
 <body>

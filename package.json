@@ -12,7 +12,21 @@
   "name": "dom-cue",
   "version": "0.0.3",
   "main": "index.js",
+  "module": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js"
+    }
+  },
   "scripts": {
     "test": "node test.js"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebReflection/dom-cue.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebReflection/dom-cue/issues"
+  },
+  "homepage": "https://github.com/WebReflection/dom-cue#readme"
 }

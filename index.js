@@ -11,6 +11,23 @@ const lisnteners = new WeakMap;
 
 let synchronous = true, computing = false;
 
+class TargetEvent extends Event {
+  #target;
+
+  constructor(target, type) {
+    super(type);
+    this.#target = target;
+  }
+
+  get target() {
+    return this.#target;
+  }
+
+  get currentTarget() {
+    return this.#target;
+  }
+}
+
 /**
  * A signal is a value that can be subscribed to and notified when it changes.
  * @template T
@@ -203,7 +220,6 @@ export class Effect extends EventTarget {
 /**
  * Create an effect with the given callback.
  * @param {() => void} callback
- * @returns {Effect}
  */
 export const effect = callback => {
   if (!callbacks.has(callback))
@@ -250,13 +266,9 @@ export const addSignalListener = (target, callback) => {
     lisnteners.set(target, known);
   }
   if (!known.has(callback)) {
-    const descriptor = { value: target };
     known.set(callback, new Effect(callback.bind(
       void 0,
-      defineProperties(change(), {
-        target: descriptor,
-        currentTarget: descriptor,
-      }),
+      new TargetEvent(target, 'change'),
     )));
   }
 };
@@ -267,8 +279,7 @@ export const addSignalListener = (target, callback) => {
  * @param {() => void} callback
  */
 export const removeSignalListener = (target, callback) => {
-  const known = lisnteners.get(target);
-  if (known) known.delete(callback);
+  lisnteners.get(target)?.delete(callback);
 };
 
 /**
