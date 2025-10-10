@@ -1,22 +1,25 @@
 // @ts-check
 
-/** @typedef {() => (() => void) | null | undefined} fx */
+/** @typedef {(() => void) | null | undefined} cleanup */
+/** @typedef {() => cleanup} fx */
 
 const { Error, Event, EventTarget, Object, Set, String } = globalThis;
 const { is } = Object;
 
-const change = () => new Event('change');
+const change = () => new Event(type);
+
 const stack = [];
+const type = 'change';
 const batched = new Set;
-const callbacks = new WeakMap;
+const effects = new WeakMap;
 const listeners = new WeakMap;
 
 let synchronous = true, computing = false;
 
-class TargetEvent extends Event {
+class ChangeEvent extends Event {
   #target;
 
-  constructor(target, type) {
+  constructor(target) {
     super(type);
     this.#target = target;
   }
@@ -109,6 +112,8 @@ export const signal = value => new Signal(value);
  */
 export class Computed extends Signal {
   #getter;
+
+  /** @type {T} */
   #value;
 
   #update() {
@@ -149,7 +154,7 @@ export class Computed extends Signal {
    * @param {any} _
    */
   set value(_) {
-    throw new Error('Computed signals are read-only');
+    throw new Error('read-only');
   }
 
   /**
@@ -161,7 +166,7 @@ export class Computed extends Signal {
   }
 
   /**
-   * Return the value without triggering a re-computation.
+   * Return the value without subscribing to signals part of the current computation.
    * @returns {T}
    */
   peek() {
@@ -184,6 +189,8 @@ export const computed = getter => new Computed(getter);
  */
 export class Effect extends EventTarget {
   #getter;
+
+  /** @type {cleanup} */
   #value;
 
   #update() {
@@ -224,8 +231,8 @@ export class Effect extends EventTarget {
  * @param {fx} callback
  */
 export const effect = callback => {
-  if (!callbacks.has(callback))
-    callbacks.set(callback, new Effect(callback));
+  if (!effects.has(callback))
+    effects.set(callback, new Effect(callback));
 };
 
 /**
@@ -243,6 +250,7 @@ export const batch = callback => {
     callback();
     if (batched.size) {
       const effects = [...batched];
+      batched.clear();
       synchronous = batching;
       for (const effect of effects)
         effect.handleEvent();
@@ -263,15 +271,15 @@ export const batch = callback => {
  * @returns
  */
 export const addSignalListener = (target, callback) => {
-  let known = listeners.get(target);
-  if (!known) {
-    known = new Map;
-    listeners.set(target, known);
+  let map = listeners.get(target);
+  if (!map) {
+    map = new Map;
+    listeners.set(target, map);
   }
-  if (!known.has(callback)) {
-    known.set(callback, new Effect(callback.bind(
+  if (!map.has(callback)) {
+    map.set(callback, new Effect(callback.bind(
       void 0,
-      new TargetEvent(target, 'change'),
+      new ChangeEvent(target),
     )));
   }
   return target;
@@ -293,5 +301,5 @@ export const removeSignalListener = (target, callback) => {
  */
 function update(i) {
   for (const l = stack.length; i < l; i++)
-    stack[i].addEventListener('change', this);
+    stack[i].addEventListener(type, this);
 }

@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "rollup --config build/index.js && npm run test && npm run size",
-    "test": "node build/test.js",
+    "test": "node test/index.js",
     "size": "cat dist.js | brotli | wc -c"
   },
   "repository": {
