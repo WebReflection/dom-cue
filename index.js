@@ -9,7 +9,7 @@ const change = () => new Event('change');
 const stack = [];
 const batched = new Set;
 const callbacks = new WeakMap;
-const lisnteners = new WeakMap;
+const listeners = new WeakMap;
 
 let synchronous = true, computing = false;
 
@@ -263,10 +263,10 @@ export const batch = callback => {
  * @returns
  */
 export const addSignalListener = (target, callback) => {
-  let known = lisnteners.get(target);
+  let known = listeners.get(target);
   if (!known) {
     known = new Map;
-    lisnteners.set(target, known);
+    listeners.set(target, known);
   }
   if (!known.has(callback)) {
     known.set(callback, new Effect(callback.bind(
@@ -284,7 +284,7 @@ export const addSignalListener = (target, callback) => {
  * @returns
  */
 export const removeSignalListener = (target, callback) => {
-  lisnteners.get(target)?.delete(callback);
+  listeners.get(target)?.delete(callback);
   return target;
 };
 
