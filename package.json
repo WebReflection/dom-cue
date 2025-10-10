@@ -13,13 +13,24 @@
   "version": "0.0.5",
   "main": "index.js",
   "module": "index.js",
+  "files": [
+    "index.js",
+    "dist.js",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": {
       "import": "./index.js"
+    },
+    "./dist": {
+      "import": "./dist.js"
     }
   },
   "scripts": {
-    "test": "node test.js"
+    "build": "rollup --config build/index.js && npm run test && npm run size",
+    "test": "node build/test.js",
+    "size": "cat dist.js | brotli | wc -c"
   },
   "repository": {
     "type": "git",
@@ -28,5 +39,9 @@
   "bugs": {
     "url": "https://github.com/WebReflection/dom-cue/issues"
   },
-  "homepage": "https://github.com/WebReflection/dom-cue#readme"
+  "homepage": "https://github.com/WebReflection/dom-cue#readme",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "rollup": "^4.52.4"
+  }
 }

@@ -1,4 +1,4 @@
-import { signal, computed, effect, batch } from './index.js';
+import { signal, computed, effect, batch } from '../index.js';
 
 var a = signal(1);
 var b = signal(2);

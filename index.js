@@ -1,7 +1,9 @@
 // @ts-check
 
+/** @typedef {() => (() => void) | null | undefined} fx */
+
 const { Error, Event, EventTarget, Object, Set, String } = globalThis;
-const { defineProperties, is } = Object;
+const { is } = Object;
 
 const change = () => new Event('change');
 const stack = [];
@@ -177,7 +179,7 @@ export const computed = getter => new Computed(getter);
 
 /**
  * An effect is a callback that is called when the signal changes.
- * @param {() => void} callback
+ * @param {fx} callback
  * @returns {Effect}
  */
 export class Effect extends EventTarget {
@@ -200,7 +202,7 @@ export class Effect extends EventTarget {
   }
 
   /**
-   * @param {() => void} callback
+   * @param {fx} callback
    */
   constructor(callback) {
     super();
@@ -219,7 +221,7 @@ export class Effect extends EventTarget {
 
 /**
  * Create an effect with the given callback.
- * @param {() => void} callback
+ * @param {fx} callback
  */
 export const effect = callback => {
   if (!callbacks.has(callback))
@@ -257,7 +259,8 @@ export const batch = callback => {
 /**
  * Add a listener that reacts to signal changes.
  * @param {Element} target
- * @param {() => void} callback
+ * @param {fx} callback
+ * @returns
  */
 export const addSignalListener = (target, callback) => {
   let known = lisnteners.get(target);
@@ -277,7 +280,8 @@ export const addSignalListener = (target, callback) => {
 /**
  * Remove a listener that reacts to signal changes.
  * @param {Element} target
- * @param {() => void} callback
+ * @param {fx} callback
+ * @returns
  */
 export const removeSignalListener = (target, callback) => {
   lisnteners.get(target)?.delete(callback);
