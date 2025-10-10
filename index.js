@@ -271,6 +271,7 @@ export const addSignalListener = (target, callback) => {
       new TargetEvent(target, 'change'),
     )));
   }
+  return target;
 };
 
 /**
@@ -280,6 +281,7 @@ export const addSignalListener = (target, callback) => {
  */
 export const removeSignalListener = (target, callback) => {
   lisnteners.get(target)?.delete(callback);
+  return target;
 };
 
 /**
