@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "license": "MIT",
+  "description": "A minimalistic signals implementation for vanilla DOM/JS",
+  "keywords": [
+    "signals",
+    "reactive",
+    "dom",
+    "javascript"
+  ],
+  "author": "Andrea Giammarchi",
+  "name": "dom-cue",
+  "version": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  }
+}
