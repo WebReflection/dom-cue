@@ -1,11 +1,13 @@
 // @ts-check
 
 const { Error, Event, EventTarget, Object, Set, String } = globalThis;
-const { is } = Object;
+const { defineProperties, is } = Object;
 
 const change = () => new Event('change');
 const stack = [];
 const batched = new Set;
+const callbacks = new WeakMap;
+const lisnteners = new WeakMap;
 
 let synchronous = true, computing = false;
 
@@ -203,7 +205,10 @@ export class Effect extends EventTarget {
  * @param {() => void} callback
  * @returns {Effect}
  */
-export const effect = callback => new Effect(callback);
+export const effect = callback => {
+  if (!callbacks.has(callback))
+    callbacks.set(callback, new Effect(callback));
+};
 
 /**
  * Batch many updates into a single re-computation.
@@ -231,6 +236,39 @@ export const batch = callback => {
     computing = previously;
     synchronous = batching;
   }
+};
+
+/**
+ * Add a listener that reacts to signal changes.
+ * @param {Element} target
+ * @param {() => void} callback
+ */
+export const addSignalListener = (target, callback) => {
+  let known = lisnteners.get(target);
+  if (!known) {
+    known = new Map;
+    lisnteners.set(target, known);
+  }
+  if (!known.has(callback)) {
+    const descriptor = { value: target };
+    known.set(callback, new Effect(callback.bind(
+      void 0,
+      defineProperties(change(), {
+        target: descriptor,
+        currentTarget: descriptor,
+      }),
+    )));
+  }
+};
+
+/**
+ * Remove a listener that reacts to signal changes.
+ * @param {Element} target
+ * @param {() => void} callback
+ */
+export const removeSignalListener = (target, callback) => {
+  const known = lisnteners.get(target);
+  if (known) known.delete(callback);
 };
 
 /**

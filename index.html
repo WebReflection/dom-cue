@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Clue</title>
+  <script type="module">
+    import { signal, computed, addSignalListener } from './index.js';
+
+    const target = document.querySelector('#counter');
+    const decrement = document.querySelector('#decrement');
+    const output = document.querySelector('#count');
+    const increment = document.querySelector('#increment');
+    const count = signal(0);
+
+    decrement.addEventListener('click', () => {
+      count.value--;
+    });
+
+    increment.addEventListener('click', () => {
+      count.value++;
+    });
+
+    addSignalListener(target, event => {
+      output.textContent = count.value;
+    });
+  </script>
+</head>
+<body>
+  <h1>DOM Clue</h1>
+  <div id="counter">
+    <button id="decrement">-</button>
+    <span id="count">0</span>
+    <button id="increment">+</button>
+  </div>
+</body>
+</html>
