@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DOM Clue</title>
   <script type="module">
-    import { signal, computed, addSignalListener } from '../dist.js';
+    import { signal, computed, addEffectListener } from '../dist/listener.js';
 
     const target = document.querySelector('#counter');
     const decrement = document.querySelector('#decrement');
@@ -21,7 +21,8 @@
       count.value++;
     });
 
-    addSignalListener(target, event => {
+    addEffectListener(target, event => {
+      console.log(event.target);
       output.textContent = count.value;
     });
 
