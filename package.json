@@ -23,15 +23,19 @@
     ".": {
       "import": "./src/index.js"
     },
+    "./listener": {
+      "import": "./src/listener.js"
+    },
     "./dist": {
       "import": "./dist/index.js"
     },
-    "./listener": {
+    "./dist-listener": {
       "import": "./dist/listener.js"
     }
   },
   "scripts": {
     "build": "rollup --config build/index.js && npm run test && npm run size",
+    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "test": "c8 node test/lib.js",
     "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c"
   },
