@@ -11,8 +11,9 @@
   "author": "Andrea Giammarchi",
   "name": "dom-cue",
   "version": "0.1.1",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "src/index.d.ts",
   "files": [
     "src/*",
     "dist/*",
