@@ -14,23 +14,26 @@
   "main": "index.js",
   "module": "index.js",
   "files": [
-    "index.js",
-    "dist.js",
+    "src/*",
+    "dist/*",
     "README.md",
     "LICENSE"
   ],
   "exports": {
     ".": {
-      "import": "./index.js"
+      "import": "./src/index.js"
     },
     "./dist": {
-      "import": "./dist.js"
+      "import": "./dist/index.js"
+    },
+    "./listener": {
+      "import": "./dist/listener.js"
     }
   },
   "scripts": {
     "build": "rollup --config build/index.js && npm run test && npm run size",
-    "test": "node test/index.js",
-    "size": "cat dist.js | brotli | wc -c"
+    "test": "c8 node test/lib.js",
+    "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c"
   },
   "repository": {
     "type": "git",
@@ -42,6 +45,7 @@
   "homepage": "https://github.com/WebReflection/dom-cue#readme",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
+    "c8": "^10.1.3",
     "rollup": "^4.52.4"
   }
 }
