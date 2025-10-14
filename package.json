@@ -21,23 +21,28 @@
   ],
   "exports": {
     ".": {
-      "import": "./src/index.js"
+      "import": "./src/index.js",
+      "types": "./src/index.d.ts"
     },
     "./listener": {
-      "import": "./src/listener.js"
+      "import": "./src/listener.js",
+      "types": "./src/listener.d.ts"
     },
     "./dist": {
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "types": "./src/index.d.ts"
     },
     "./dist-listener": {
-      "import": "./dist/listener.js"
+      "import": "./dist/listener.js",
+      "types": "./src/listener.d.ts"
     }
   },
   "scripts": {
-    "build": "rollup --config build/index.js && npm run test && npm run size",
+    "build": "rollup --config build/index.js && npm run test && npm run types && npm run size",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "test": "c8 node test/lib.js",
-    "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c"
+    "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c",
+    "types": "rm -f ./src/*.d.ts && tsc --allowJs --checkJs --lib dom,esnext --module esnext --target esnext -d --emitDeclarationOnly ./src/*.js"
   },
   "repository": {
     "type": "git",
@@ -50,6 +55,7 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "c8": "^10.1.3",
-    "rollup": "^4.52.4"
+    "rollup": "^4.52.4",
+    "typescript": "^5.9.3"
   }
 }
