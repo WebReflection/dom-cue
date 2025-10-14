@@ -10,7 +10,7 @@
   ],
   "author": "Andrea Giammarchi",
   "name": "dom-cue",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "main": "index.js",
   "module": "index.js",
   "files": [
