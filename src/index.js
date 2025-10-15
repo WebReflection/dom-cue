@@ -103,7 +103,7 @@ export const signal = value => new Signal(value);
 let compute, subscribe, unsubscribe;
 
 /**
- * A computed signal is a signal that is computed from other signals.
+ * A computed signal is a read-only signal that is computed from other signals.
  * @template T
  */
 export class Computed extends Signal {
@@ -199,7 +199,7 @@ export class Computed extends Signal {
  * Create a computed signal via the given getter.
  * @template T
  * @param {() => T} value
- * @returns {Signal<T>}
+ * @returns {Computed<T>}
  */
 export const computed = value => new Computed(value);
 

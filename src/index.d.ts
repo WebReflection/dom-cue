@@ -24,7 +24,7 @@ export class Signal<T> extends EventTarget {
 }
 export function signal<T>(value: T): Signal<T>;
 /**
- * A computed signal is a signal that is computed from other signals.
+ * A computed signal is a read-only signal that is computed from other signals.
  * @template T
  */
 export class Computed<T> extends Signal<any> {
@@ -43,7 +43,7 @@ export class Computed<T> extends Signal<any> {
     handleEvent(event: Event): void;
     #private;
 }
-export function computed<T>(value: () => T): Signal<T>;
+export function computed<T>(value: () => T): Computed<T>;
 export function effect(callback: fx): cleanup;
 export function batch(callback: () => void): void;
 export function untracked<T>(callback: () => T): T;
