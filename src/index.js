@@ -20,8 +20,8 @@ const batched = new Set;
 
 let synchronous = true, tracked = true, computing = null;
 
-// @protected Signal#get, Signal#set
-let get, set;
+// @protected Signal#set
+let set;
 
 /**
  * A signal is a value that can be subscribed to and notified when it changes.
@@ -29,13 +29,6 @@ let get, set;
  */
 export class Signal extends Set {
   static {
-    /**
-     * @template T
-     * @param {Signal<T>} signal
-     * @returns {T}
-     */
-    get = signal => signal.#value;
-
     /**
      * @template T
      * @param {Signal<T>} signal
@@ -178,7 +171,7 @@ export class Computed extends Signal {
         signal.add(computing.add(signal));
     }
 
-    return get(this);
+    return super.peek();
   }
 
   get [Symbol.toStringTag]() {
@@ -191,7 +184,7 @@ export class Computed extends Signal {
    */
   peek() {
     this.#run();
-    return get(this);
+    return super.peek();
   }
 }
 
