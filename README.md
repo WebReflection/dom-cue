@@ -6,6 +6,8 @@
 
 A minimalistic signals implementation for vanilla DOM/JS, inspired by [Preact Signals API](https://preactjs.com/guide/v10/signals/).
 
+<sub>**[Live Demo](https://codepen.io/WebReflection/pen/vELWNNx?editors=0010)**</sub>
+
 ```js
 import {
   // https://esm.run/dom-cue exports
