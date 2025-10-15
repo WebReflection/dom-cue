@@ -7,12 +7,20 @@ const { String } = globalThis;
 const { toStringTag } = Symbol;
 const { is } = Object;
 
+/**
+ * @param {Set} self
+ * @returns {Computed[]}
+ */
 const cleared = self => {
   const computed = [...self];
   self.clear();
   return computed;
 };
 
+/**
+ * @param {Computed} computed
+ * @param {Signal} signal
+ */
 const subscribe = (computed, signal) => {
   computed.add(signal);
   signal.add(computed);
@@ -176,7 +184,7 @@ export class Computed extends Signal {
     this.#run();
 
     if (this.#subscribe && tracked && computing) {
-      for (const signal of this)
+      for (const signal of cleared(this))
         subscribe(computing, signal);
     }
 
