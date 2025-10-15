@@ -3,16 +3,20 @@
 /** @typedef {(() => void) | null | undefined} cleanup */
 /** @typedef {() => cleanup} fx */
 
-const { Event, Set, String } = globalThis;
+const { String } = globalThis;
 const { toStringTag } = Symbol;
 const { is } = Object;
 
-const add = (ref, listener) => ref.addEventListener(type, listener, once);
-const remove = (ref, listener) => ref.removeEventListener(type, listener);
+const cleared = self => {
+  const computed = [...self];
+  self.clear();
+  return computed;
+};
 
-const change = () => new Event(type);
-const once = { once: true };
-const type = 'change';
+const subscribe = (computed, signal) => {
+  computed.add(signal);
+  signal.add(computed);
+};
 
 const batched = new Set;
 
@@ -25,7 +29,7 @@ let get, set;
  * A signal is a value that can be subscribed to and notified when it changes.
  * @template T
  */
-export class Signal extends EventTarget {
+export class Signal extends Set {
   static {
     /**
      * @template T
@@ -66,7 +70,8 @@ export class Signal extends EventTarget {
   set value(value) {
     if (!is(this.#value, value)) {
       this.#value = value;
-      this.dispatchEvent(change());
+      for (const computed of cleared(this))
+        update(computed);
     }
   }
 
@@ -79,7 +84,7 @@ export class Signal extends EventTarget {
    * @returns {T}
    */
   peek() {
-    return get(this);
+    return this.#value;
   }
 
   toString() {
@@ -99,8 +104,8 @@ export class Signal extends EventTarget {
  */
 export const signal = value => new Signal(value);
 
-// @protected Computed#compute, Computed#subscribe, Computed#unsubscribe
-let compute, subscribe, unsubscribe;
+// @protected Computed#compute, Computed#update
+let compute, update;
 
 /**
  * A computed signal is a read-only signal that is computed from other signals.
@@ -116,27 +121,13 @@ export class Computed extends Signal {
     compute = $ => $.#compute;
 
     /**
-     * @template T,S
-     * @param {Computed<T>} $
-     * @param {Signal<S>} signal
-     */
-    subscribe = ($, signal) => {
-      $.#signals.add(signal);
-      add(signal, $);
-    };
-
-    /**
      * @template T
      * @param {Computed<T>} $
      */
-    unsubscribe = $ => {
-      for (const signal of $.#signals)
-        remove(signal, $);
+    update = $ => {
+      $.#update();
     };
   }
-
-  /** @type {() => T} */
-  #value;
 
   /** @type {boolean} */
   #compute = true;
@@ -144,8 +135,29 @@ export class Computed extends Signal {
   /** @type {boolean} */
   #subscribe = true;
 
-  /** @type {Set<Signal<unknown>>} */
-  #signals = new Set;
+  /** @type {() => T} */
+  #value;
+
+  #run() {
+    if (this.#compute) {
+      const previously = computing;
+      computing = this;
+      this.#compute = false;
+      this.clear();
+      try {
+        set(this, this.#value());
+      }
+      finally {
+        computing = previously;
+      }
+    }
+  }
+
+  #update() {
+    this.#compute = true;
+    if (synchronous) this.#subscribe || this.#run();
+    else batched.add(this);
+  }
 
   /**
    * A computed signal is a signal that is computed from other signals.
@@ -161,21 +173,10 @@ export class Computed extends Signal {
    * @type {T}
    */
   get value() {
-    if (this.#compute) {
-      this.#compute = false;
-      this.#signals.clear();
-      const previously = computing;
-      computing = this;
-      try {
-        set(this, this.#value());
-      }
-      finally {
-        computing = previously;
-      }
-    }
+    this.#run();
 
     if (this.#subscribe && tracked && computing) {
-      for (const signal of this.#signals)
+      for (const signal of this)
         subscribe(computing, signal);
     }
 
@@ -187,22 +188,11 @@ export class Computed extends Signal {
   }
 
   /**
-   * @param {Event} event 
+   * Return the value without subscribing.
+   * @returns {T}
    */
-  handleEvent(event) {
-    this.#compute = true;
-    if (synchronous) this.dispatchEvent(change());
-    else batched.add(this);
-  }
-
   peek() {
-    if (this.#compute) {
-      const subscribe = this.#subscribe;
-      this.#subscribe = false;
-      const value = this.value;
-      this.#subscribe = subscribe;
-      return value;
-    }
+    this.#run();
     return get(this);
   }
 }
@@ -222,16 +212,17 @@ export const computed = value => new Computed(value);
  */
 export const effect = callback => {
   let value;
-  const fx = new Computed(callback, true);
-  const listener = () => {
-    value?.();
-    value = fx.value;
-    add(fx, listener);
-  };
-  listener();
+  const fx = new Computed(
+    () => {
+      value?.();
+      value = callback();
+    },
+    true
+  );
+  fx.value;
   return () => {
-    remove(fx, listener);
-    unsubscribe(fx);
+    for (const signal of cleared(fx))
+      signal.delete(fx);
     value?.();
   };
 };
@@ -246,11 +237,9 @@ export const batch = callback => {
   try {
     callback();
     if (finalize && batched.size) {
-      const batch = [...batched];
-      batched.clear();
       synchronous = finalize;
-      for (let i = 0; i < batch.length; i++) {
-        if (compute(batch[i])) batch[i].handleEvent();
+      for (const batch of cleared(batched)) {
+        if (compute(batch)) update(batch);
       }
     }
   }

@@ -2,7 +2,7 @@
  * A signal is a value that can be subscribed to and notified when it changes.
  * @template T
  */
-export class Signal<T> extends EventTarget {
+export class Signal<T> extends Set<any> {
     [x: symbol]: string;
     /**
      * Create a signal with the given value.
@@ -38,9 +38,10 @@ export class Computed<T> extends Signal<any> {
      */
     get value(): T;
     /**
-     * @param {Event} event
+     * Return the value without subscribing.
+     * @returns {T}
      */
-    handleEvent(event: Event): void;
+    peek(): T;
     #private;
 }
 export function computed<T>(value: () => T): Computed<T>;

@@ -4,7 +4,7 @@
 
 <sup>**Social Media Photo by [Emily Richards](https://unsplash.com/@emilyrichardsss) on [Unsplash](https://unsplash.com/)**</sup>
 
-A minimalistic, *EventTarget* driven, signals implementation for vanilla DOM/JS, inspired by [Preact Signals API](https://preactjs.com/guide/v10/signals/) yet extremely simpler and easier to reason about around DOM changes, where the engine decideds what to *batch* and what not, keeping effects possible returned callbacks in mind.
+A minimalistic signals implementation for vanilla DOM/JS, inspired by [Preact Signals API](https://preactjs.com/guide/v10/signals/).
 
 ```js
 import {
