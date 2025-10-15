@@ -16,14 +16,6 @@ const cleared = self => {
   return computed;
 };
 
-/**
- * @param {Computed} computed
- * @param {Signal} signal
- */
-const subscribe = (computed, signal) => {
-  signal.add(computed.add(signal));
-};
-
 const batched = new Set;
 
 let synchronous = true, tracked = true, computing = null;
@@ -70,7 +62,7 @@ export class Signal extends Set {
    * @type {T}
    */
   get value() {
-    if (tracked && computing) subscribe(computing, this);
+    if (tracked && computing) this.add(computing.add(this));
     return this.#value;
   }
   set value(value) {
@@ -183,7 +175,7 @@ export class Computed extends Signal {
 
     if (this.#subscribe && tracked && computing) {
       for (const signal of cleared(this))
-        subscribe(computing, signal);
+        signal.add(computing.add(signal));
     }
 
     return get(this);
