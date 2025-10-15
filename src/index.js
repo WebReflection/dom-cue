@@ -3,9 +3,9 @@
 /** @typedef {(() => void) | null | undefined} cleanup */
 /** @typedef {() => cleanup} fx */
 
-const { String } = globalThis;
-const { toStringTag } = Symbol;
-const { is } = Object;
+const toStringTag = Symbol.toStringTag;
+const S = String;
+const is = Object.is;
 
 /**
  * @param {Set} self
@@ -22,8 +22,7 @@ const cleared = self => {
  * @param {Signal} signal
  */
 const subscribe = (computed, signal) => {
-  computed.add(signal);
-  signal.add(computed);
+  signal.add(computed.add(signal));
 };
 
 const batched = new Set;
@@ -96,7 +95,7 @@ export class Signal extends Set {
   }
 
   toString() {
-    return String(this.value);
+    return S(this.value);
   }
 
   valueOf() {
