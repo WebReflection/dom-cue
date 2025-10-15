@@ -219,8 +219,8 @@ export const effect = callback => {
   listener();
   return () => {
     remove(fx, listener);
-    value?.();
     unsubscribe(fx);
+    value?.();
   };
 };
 
