@@ -32,7 +32,7 @@ export class Computed<T> extends Signal<any> {
      * A computed signal is a signal that is computed from other signals.
      * @param {() => T} value
      */
-    constructor(value: () => T);
+    constructor(value: () => T, fx?: boolean);
     /**
      * @type {T}
      */

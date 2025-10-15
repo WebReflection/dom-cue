@@ -138,7 +138,7 @@ export default (name, { signal, computed, batch, untracked, effect }) => {
     ['effect', 7, 42],
   ]);
 
-  effect(() => {
+  const fx = effect(() => {
     log('outer', a.value);
     effect(() => {
       log('inner', c.value);
@@ -150,6 +150,11 @@ export default (name, { signal, computed, batch, untracked, effect }) => {
   test('nested effects', [
     ['outer', 7],
     ['inner', 14],
+  ]);
+
+  fx();
+  test('cleanup', [
+    ['outer unmounted'],
   ]);
 
   console.timeEnd('⏱️');

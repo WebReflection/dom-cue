@@ -141,6 +141,9 @@ export class Computed extends Signal {
   /** @type {boolean} */
   #compute = true;
 
+  /** @type {boolean} */
+  #subscribe = true;
+
   /** @type {Set<Signal<unknown>>} */
   #signals = new Set;
 
@@ -148,9 +151,10 @@ export class Computed extends Signal {
    * A computed signal is a signal that is computed from other signals.
    * @param {() => T} value
    */
-  constructor(value) {
+  constructor(value, fx = false) {
     super(void 0);
     this.#value = value;
+    this.#subscribe = !fx;
   }
 
   /**
@@ -169,7 +173,8 @@ export class Computed extends Signal {
         computing = previously;
       }
     }
-    if (tracked && computing && !(this instanceof Effect)) {
+
+    if (this.#subscribe && tracked && computing) {
       for (const signal of this.#signals)
         subscribe(computing, signal);
     }
@@ -198,8 +203,6 @@ export class Computed extends Signal {
  */
 export const computed = value => new Computed(value);
 
-class Effect extends Computed {}
-
 /**
  * An effect is a callback that is automatically called when its signals change.
  * @param {fx} callback 
@@ -207,15 +210,16 @@ class Effect extends Computed {}
  */
 export const effect = callback => {
   let value;
-  const fx = new Effect(callback);
+  const fx = new Computed(callback, true);
   const listener = () => {
-    if (typeof value === 'function') value();
+    value?.();
     value = fx.value;
     add(fx, listener);
   };
   listener();
   return () => {
     remove(fx, listener);
+    value?.();
     unsubscribe(fx);
   };
 };
