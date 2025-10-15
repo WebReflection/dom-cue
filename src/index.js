@@ -178,6 +178,7 @@ export class Computed extends Signal {
       for (const signal of this.#signals)
         subscribe(computing, signal);
     }
+
     return get(this);
   }
 
@@ -192,6 +193,17 @@ export class Computed extends Signal {
     this.#compute = true;
     if (synchronous) this.dispatchEvent(change());
     else batched.add(this);
+  }
+
+  peek() {
+    if (this.#compute) {
+      const subscribe = this.#subscribe;
+      this.#subscribe = false;
+      const value = this.value;
+      this.#subscribe = subscribe;
+      return value;
+    }
+    return get(this);
   }
 }
 

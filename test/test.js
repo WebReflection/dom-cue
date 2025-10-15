@@ -157,6 +157,24 @@ export default (name, { signal, computed, batch, untracked, effect }) => {
     ['outer unmounted'],
   ]);
 
+  const z = signal(0);
+  const comp = computed(() => {
+    log('computing comp', z.value);
+    return z.value;
+  });
+  comp.peek();
+  test('peek #1', [
+    ['computing comp', 0],
+  ]);
+  comp.peek();
+  test('peek #2');
+  z.value++;
+  test('peek #3');
+  comp.value;
+  test('peek #1', [
+    ['computing comp', 1],
+  ]);
+
   console.timeEnd('⏱️');
   console.log('');
 
