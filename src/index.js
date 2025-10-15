@@ -3,7 +3,6 @@
 /** @typedef {(() => void) | null | undefined} cleanup */
 /** @typedef {() => cleanup} fx */
 
-const toStringTag = Symbol.toStringTag;
 const S = String;
 const is = Object.is;
 
@@ -40,18 +39,18 @@ export class Signal extends Set {
   static {
     /**
      * @template T
-     * @param {Signal<T>} $
+     * @param {Signal<T>} signal
      * @returns {T}
      */
-    get = $ => $.#value;
+    get = signal => signal.#value;
 
     /**
      * @template T
-     * @param {Signal<T>} $
+     * @param {Signal<T>} signal
      * @param {T} value
      */
-    set = ($, value) => {
-      $.#value = value;
+    set = (signal, value) => {
+      signal.#value = value;
     };
   }
 
@@ -82,7 +81,7 @@ export class Signal extends Set {
     }
   }
 
-  get [toStringTag]() {
+  get [Symbol.toStringTag]() {
     return 'Signal';
   }
 
@@ -122,17 +121,17 @@ export class Computed extends Signal {
   static {
     /**
      * @template T
-     * @param {Computed<T>} $
+     * @param {Computed<T>} computed
      * @returns {boolean}
      */
-    compute = $ => $.#compute;
+    compute = computed => computed.#compute;
 
     /**
      * @template T
-     * @param {Computed<T>} $
+     * @param {Computed<T>} computed
      */
-    update = $ => {
-      $.#update();
+    update = computed => {
+      computed.#update();
     };
   }
 
@@ -190,7 +189,7 @@ export class Computed extends Signal {
     return get(this);
   }
 
-  get [toStringTag]() {
+  get [Symbol.toStringTag]() {
     return 'Computed';
   }
 

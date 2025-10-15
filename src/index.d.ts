@@ -3,7 +3,6 @@
  * @template T
  */
 export class Signal<T> extends Set<any> {
-    [x: symbol]: string;
     /**
      * Create a signal with the given value.
      * @param {T} value
