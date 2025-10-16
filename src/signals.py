@@ -1,35 +1,6 @@
 __all__ = ['Signal', 'signal', 'Computed', 'computed', 'effect', 'batch', 'untracked']
 
 
-class Set(list):
-    """
-    Strictly mimicking the JS Set class
-    allowing operations otherwise hard to obtain
-    with just the list class (such as remove(item))
-    """
-
-    def add(self, value):
-        for item in self:
-            if item is value:
-                return self
-
-        self.append(value)
-
-        return self
-
-    def delete(self, value):
-        i = -1
-
-        for item in self:
-            i += 1
-
-            if item is value:
-                break
-
-        if i != -1:
-          self.pop(i)
-
-
 def cleared(self):
     """
     Clears the set and returns a copy of the items
@@ -40,7 +11,7 @@ def cleared(self):
 
 
 # used to store computed signals that need to be updated
-batched = Set()
+batched = set()
 
 # whether the current computation is synchronous (not batched)
 synchronous = True
@@ -52,25 +23,33 @@ tracked = True
 computing = None
 
 
-class Signal(Set):
+class Signal(set):
     """
-    A signal is a value that can be subscribed to and notified when it changes.
+    A signal is a value that can be subscribed to and
+    be notified when it changes.
     """
 
     def __init__(self, value):
         super().__init__()
         self._value = value
 
+    def __eq__(self, other):
+        return id(self) == id(other)
+
+    def __hash__(self):
+        return hash(repr(self))
+
     def __str__(self):
         return str(self.value)
 
     def __repr__(self):
-        return f"Signal({self._value})"
+        return f"<Signal <{repr(self._value)}> at {hex(id(self))}>"
 
     @property
     def value(self):
         if tracked and computing is not None:
-            self.add(computing.add(self))
+            computing.add(self)
+            self.add(computing)
 
         return self._value
 
@@ -91,7 +70,9 @@ signal = lambda value: Signal(value)
 
 class Computed(Signal):
     """
-    A computed signal is a read-only signal that is computed from other signals.
+    A computed signal is a read-only signal function that
+    automatically subscribes to the signals it depends on
+    and returns its updated value once any of these change.
     """
 
     def __init__(self, value, fx=False):
@@ -101,7 +82,8 @@ class Computed(Signal):
         self._subscribe = not fx
 
     def __repr__(self):
-        return f"Computed({self._computed})"
+        name = "Computed" if self._subscribe else "Effect"
+        return f"<{name} <{repr(self._computed)}> at {hex(id(self))}>"
 
     def _run(self):
         global computing
@@ -130,7 +112,8 @@ class Computed(Signal):
 
         if self._subscribe and tracked and computing is not None:
             for signal in cleared(self):
-                signal.add(computing.add(signal))
+                computing.add(signal)
+                signal.add(computing)
 
         return self._computed
 
@@ -160,7 +143,7 @@ def effect(callback):
 
     def cleanup():
         for signal in cleared(fx):
-            signal.delete(fx)
+            signal.discard(fx)
 
         if callable(value):
             value()
@@ -173,7 +156,8 @@ def effect(callback):
 
 def batch(callback):
     """
-    Run the callback without tracking its signals.
+    Run the callback without tracking its signals
+    during its execution, combining all updates into a single batch.
     """
 
     global synchronous
@@ -196,7 +180,7 @@ def batch(callback):
 
 def untracked(callback):
     """
-    Run the callback without tracking its signals.
+    Run the callback without tracking its signals at all.
     """
     global tracked
 
