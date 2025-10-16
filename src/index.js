@@ -196,6 +196,8 @@ export class Computed extends Signal {
  */
 export const computed = value => new Computed(value);
 
+// const fr = new FinalizationRegistry(console.log);
+
 /**
  * An effect is a callback that is automatically called when its signals change.
  * @param {fx} callback 
@@ -211,6 +213,7 @@ export const effect = callback => {
     true
   );
   fx.value;
+  // fr.register(fx, callback.toString());
   return () => {
     for (const signal of cleared(fx))
       signal.delete(fx);

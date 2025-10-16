@@ -23,7 +23,7 @@
 
     // both the main effect and the nested one depend
     // on the counter value, directly or indirectly
-    counter.value = 2
+    counter.value = 2;
 
     // the counter is now 2
     //   • multiplied by 1 is 0 // ❔ previous compute
@@ -33,7 +33,15 @@
 
     // only the nested effect depends on the multiplier value
     // so only the nested effect will run here
-multiplier.value = 2
+    multiplier.value = 2;
+    multiplier.value = 3;
+
+    console.log("------------------------");
+
+    increment.onclick = () => counter.value++;
   </script>
 </head>
+<body>
+  <button id="increment">counter increment</button>
+</body>
 </html>
