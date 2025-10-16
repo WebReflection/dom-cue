@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOM Clue</title>
+  <script type="module">
+    import { signal, computed, effect } from '../src/index.js';
+
+    const counter = signal(0);
+    const multiplier = signal(1);
+    const op = computed(() => counter.value * multiplier.value);
+
+    effect(() => {
+      console.log(`the counter is now ${counter.value}`);
+      effect(() => {
+        const m = multiplier.peek();
+        console.log(`  • multiplied by ${m} is ${op.value}`);
+      });
+    });
+
+    console.log("------------------------");
+
+    // both the main effect and the nested one depend
+    // on the counter value, directly or indirectly
+    counter.value = 2
+
+    // the counter is now 2
+    //   • multiplied by 1 is 0 // ❔ previous compute
+    //   • multiplied by 1 is 2 // ✔️ updated compute
+
+    console.log("------------------------");
+
+    // only the nested effect depends on the multiplier value
+    // so only the nested effect will run here
+multiplier.value = 2
+  </script>
+</head>
+</html>
