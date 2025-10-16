@@ -1,5 +1,40 @@
 __all__ = ['Signal', 'signal', 'Computed', 'computed', 'effect', 'batch', 'untracked']
 
+class Set(list):
+    """
+    Strictly mimicking the JS Set class
+    allowing operations otherwise hard to obtain
+    with just the `list` class (such as remove(item))
+    and hard to guarantee stable iteration order
+    when using a `set` subclass instead
+    """
+
+    def add(self, value):
+        """
+        Add a value to the set if not present.
+        Preserves insertion order.
+        """
+        for item in self:
+            if item is value:
+                return self
+
+        self.append(value)
+
+    def discard(self, value):
+        """
+        Remove a value from the set if present.
+        """
+        i = -1
+
+        for item in self:
+            i += 1
+
+            if item is value:
+                break
+
+        if i != -1:
+          self.pop(i)
+
 
 def cleared(self):
     """
@@ -11,7 +46,7 @@ def cleared(self):
 
 
 # used to store computed signals that need to be updated
-batched = set()
+batched = Set()
 
 # whether the current computation is synchronous (not batched)
 synchronous = True
@@ -23,7 +58,7 @@ tracked = True
 computing = None
 
 
-class Signal(set):
+class Signal(Set):
     """
     A signal is a value that can be subscribed to and
     be notified when it changes.
