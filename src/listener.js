@@ -1,12 +1,15 @@
 // @ts-check
 
+/** @typedef {(event?:Event) => void} Listener */
+/** @typedef {(EventListener & { handleEvent: Listener })} Handler */
+
 import { effect } from './index.js';
 export * from './index.js';
 
 /**
  * @template T
  */
-class ChangeEvent extends Event {
+class EffectEvent extends Event {
   /** @type {T} */
   #target;
 
@@ -14,7 +17,7 @@ class ChangeEvent extends Event {
    * @param {T} target 
    */
   constructor(target) {
-    super('change');
+    super('effect');
     this.#target = target;
   }
 
@@ -29,13 +32,13 @@ class ChangeEvent extends Event {
   }
 }
 
-/** @type {WeakMap<object, Map<(event?:Event) => void, import('./index.js').cleanup>>} */
+/** @type {WeakMap<object, Map<(Listener | Handler), import('./index.js').cleanup>>} */
 const listeners = new WeakMap;
 
 /**
  * @template T
  * @param {T} target
- * @param {(event?:Event) => void} listener
+ * @param {Listener | Handler} listener
  * @returns {T}
  */
 export const addEffectListener = (target, listener) => {
@@ -45,10 +48,9 @@ export const addEffectListener = (target, listener) => {
     listeners.set(target, effects);
   }
   if (!effects.has(listener)) {
-    effects.set(
-      listener,
-      effect(listener.bind(void 0, new ChangeEvent(target)))
-    );
+    const ctx = typeof listener === 'function' ? void 0 : listener;
+    const fn = ctx ? /** @type {Handler} */ (listener).handleEvent : listener;
+    effects.set(listener, effect(fn.bind(ctx, new EffectEvent(target))));
   }
   return target;
 };
