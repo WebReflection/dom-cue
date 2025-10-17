@@ -124,7 +124,7 @@ export class Computed extends Signal {
   #compute = true;
 
   /** @type {boolean} */
-  #subscribe = true;
+  #subscribe;
 
   /** @type {() => T} */
   #value;
