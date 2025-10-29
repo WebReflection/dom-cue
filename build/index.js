@@ -16,5 +16,21 @@ export default [
       esModule: true,
       file: './dist/listener.js',
     }
+  },
+  {
+    plugins: [terser()],
+    input: './src/nested.js',
+    output: {
+      esModule: true,
+      file: './dist/nested.js',
+    }
+  },
+  {
+    plugins: [terser()],
+    input: './src/nested-listener.js',
+    output: {
+      esModule: true,
+      file: './dist/nested-listener.js',
+    }
   }
 ];

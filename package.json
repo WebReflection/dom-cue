@@ -29,6 +29,14 @@
       "import": "./src/listener.js",
       "types": "./src/listener.d.ts"
     },
+    "./nested": {
+      "import": "./src/nested.js",
+      "types": "./src/nested.d.ts"
+    },
+    "./nested-listener": {
+      "import": "./src/nested-listener.js",
+      "types": "./src/nested-listener.d.ts"
+    },
     "./dist": {
       "import": "./dist/index.js",
       "types": "./src/index.d.ts"
@@ -36,13 +44,22 @@
     "./dist-listener": {
       "import": "./dist/listener.js",
       "types": "./src/listener.d.ts"
+    },
+    "./dist-nested": {
+      "import": "./dist/nested.js",
+      "types": "./src/nested.d.ts"
+    },
+    "./dist-nested-listener": {
+      "import": "./dist/nested-listener.js",
+      "types": "./src/nested-listener.d.ts"
     }
   },
   "scripts": {
-    "build": "rollup --config build/index.js && npm run test && npm run types && npm run size",
+    "build": "npm run build:nl && rollup --config build/index.js && npm run test && npm run types && npm run size",
+    "build:nl": "cp src/listener.js src/nested-listener.js && sed -i \"s/index.js';/nested.js';/g\" src/nested-listener.js",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "test": "c8 node test/lib.js",
-    "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c",
+    "size": "echo -n 'index.js: '; cat dist/index.js | brotli | wc -c; echo -n 'listener.js: '; cat dist/listener.js | brotli | wc -c; echo -n 'nested.js: '; cat dist/nested.js | brotli | wc -c; echo -n 'nested-listener.js: '; cat dist/nested-listener.js | brotli | wc -c",
     "types": "rm -f ./src/*.d.ts && tsc --allowJs --checkJs --lib dom,esnext --module esnext --target esnext -d --emitDeclarationOnly ./src/*.js"
   },
   "repository": {
